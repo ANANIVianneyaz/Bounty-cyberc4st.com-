@@ -1,4 +1,3 @@
-cat > ~/mailster_poc_v2.sh << 'SCRIPT'
 #!/bin/bash
 clear
 echo ""
@@ -20,7 +19,6 @@ test_payload() {
   printf "🧪 Test %d : %s\n" "$id" "$desc"
   printf "   Payload : %s\n" "$payload"
   
-  # Écrire le JSON dans un fichier (évite les problèmes de quoting bash)
   cat > "$jsonfile" << JSONEOF
 {
   "email": "${email}",
@@ -76,12 +74,8 @@ if [ $PASS -ge 1 ]; then
   echo ""
   echo "   → Exécution = Stored XSS Critical"
   echo "   → Échappé   = CWE-20 Low"
-else
-  echo "⚠️  Tous les payloads rejetés."
-  echo "   Le endpoint est peut-être protégé ou le format a changé."
 fi
 
 echo ""
 echo "🔧 Remédiation : sanitize_text_field() ou htmlspecialchars()"
 echo "══════════════════════════════════════════════════════════════"
-SCRIPT
